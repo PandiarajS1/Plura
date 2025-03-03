@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
+import { withUt } from "uploadthing/tw"
 
-export default {
+export default withUt({
     darkMode: ["class"],
     content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,6 +9,13 @@ export default {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+	container:{
+		center: true,
+		padding:'2rem',
+		screens:{
+			'2xl':"1400px"
+		}
+	},
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
@@ -91,4 +99,4 @@ export default {
   	}
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} satisfies Config);

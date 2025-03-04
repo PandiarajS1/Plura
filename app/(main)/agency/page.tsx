@@ -1,9 +1,12 @@
-import React from 'react'
+import { currentUser } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import React from "react";
 
-const page = () => {
-  return (
-    <div>Agency Dashboard</div>
-  )
-}
+const page = async () => {
+  const authUser = await currentUser();
+  if (!authUser) return redirect("/sign-in");
 
-export default page
+  return <div>Agency Dashboard</div>;
+};
+
+export default page;

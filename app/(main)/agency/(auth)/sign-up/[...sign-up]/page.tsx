@@ -1,10 +1,12 @@
 import React from "react";
 import { SignUp } from "@clerk/nextjs";
 
-const Page = () => {
+const page = () => {
+  return (
     <div>
-        <SignUp/>
+      <SignUp />
     </div>
-}
+  );
+};
 
-export default Page
+export default page;

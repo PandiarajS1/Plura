@@ -33,6 +33,7 @@ import {
   initUser,
   saveActivityLogsNotification,
   updateAgencyDetails,
+  upsertAgency,
 } from "@/lib/queries";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
@@ -46,6 +47,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { v4 } from "uuid";
 
 type Props = {
   data?: Partial<Agency>;
@@ -67,7 +69,6 @@ const FormSchema = z.object({
 });
 
 const AgencyDetails = ({ data }: Props) => {
-  // const route = useRouter();
   const [deletingAgency, setDeletingAgency] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -124,10 +125,36 @@ const AgencyDetails = ({ data }: Props) => {
       }
       newUserData = await initUser({ role: "AGENCY_OWNER" });
 
-      if (!data?.customerId) {
-        // const response
+      if (!data?.id) {
+        const response = await upsertAgency({
+          id: data?.id ? data.id : v4(),
+          address: values.address,
+          agencyLogo: values.agencyLogo,
+          city: values.city,
+          companyEmail: values.companyEmail,
+          companyPhone: values.companyPhone,
+          country: values.country,
+          name: values.name,
+          state: values.state,
+          whiteLabel: values.whiteLabel,
+          zipcode: values.zipcode,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          connectAccountId: "",
+          goal: 5,
+        });
+        toast("Created Agency");
+        if (data?.id) return useRouter().reload();
+        if (response) {
+          return useRouter().reload();
+        }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      toast("Opps", {
+        description: "Could not create an agency",
+      });
+    }
   };
 
   const handleDeleteAgency = async () => {
@@ -359,7 +386,11 @@ const AgencyDetails = ({ data }: Props) => {
                   />
                 </div>
               )}
-              <Button disabled={isLoading} type="submit">
+              <Button
+                disabled={isLoading}
+                type="submit"
+                className="flex ml-auto"
+              >
                 {isLoading && <Loader2 className="animate-spin" />}
                 Save Agency Information
               </Button>

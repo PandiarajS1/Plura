@@ -22,7 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { useRouter } from "next/router";
+
 import { useForm } from "react-hook-form";
 import FileUpload from "@/globals/file-upload";
 import { Input } from "../ui/input";
@@ -48,6 +48,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { v4 } from "uuid";
+import { revalidatePath } from "next/cache";
 
 type Props = {
   data?: Partial<Agency>;
@@ -144,9 +145,9 @@ const AgencyDetails = ({ data }: Props) => {
           goal: 5,
         });
         toast("Created Agency");
-        if (data?.id) return useRouter().reload();
+        if (data?.id) return revalidatePath(`/agency`);
         if (response) {
-          return useRouter().reload();
+          return revalidatePath(`/agency`);
         }
       }
     } catch (error) {
@@ -167,7 +168,7 @@ const AgencyDetails = ({ data }: Props) => {
       toast("Deleted Agency", {
         description: "Deleted your agency and all subaccounts",
       });
-      useRouter().reload();
+      revalidatePath(`/agency`);
     } catch (error) {
       console.log(error);
       toast("Opps", {
@@ -377,7 +378,7 @@ const AgencyDetails = ({ data }: Props) => {
                         description: `Updated the agency goal to | ${val} SubAccount`,
                         subaccountId: undefined,
                       });
-                      useRouter().reload;
+                      revalidatePath(`/agency`);
                     }}
                     min={1}
                     max={10000}

@@ -1,7 +1,8 @@
 import React from "react";
 
-const page = ({ params }: { params: { agencyId: string } }) => {
-  return <div>{params.agencyId}</div>;
+const page = async (props: { params: Promise<{ agencyId: string }> }) => {
+  const params = await props.params;
+  return <div></div>;
 };
 
 export default page;

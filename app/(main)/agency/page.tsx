@@ -5,11 +5,10 @@ import { Plan } from "@prisma/client";
 import { redirect } from "next/navigation";
 import React from "react";
 
-const page = async ({
-  searchParams,
-}: {
-  searchParams: { plan: Plan; state: string; code: string };
+const page = async (props: {
+  searchParams: Promise<{ plan: Plan; state: string; code: string }>;
 }) => {
+  const searchParams = await props.searchParams;
   const authUser = await currentUser();
   const agencyId = await verifyAndAcceptInvitation();
   console.log(agencyId);

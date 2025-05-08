@@ -1,5 +1,5 @@
 import { ModeToggle } from "@/globals/mode-toggle";
-import { UserButton } from "@clerk/nextjs";
+import { currentUser, UserButton } from "@clerk/nextjs";
 import { User } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,7 +38,7 @@ const Navigation = ({ user }: Props) => {
           href={"/agency"}
           className="bg-primary text-white text-center p-1.5 px-4 rounded-md hover:bg-primary/80"
         >
-          Login
+          {user ? "Dashboard" : "Get Started"}
         </Link>
         <UserButton />
       </aside>

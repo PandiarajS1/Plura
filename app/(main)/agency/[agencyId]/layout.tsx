@@ -1,10 +1,13 @@
 import Sidebar from "@/components/sidebar";
 import Unauthorized from "@/components/unauthorized";
+import BlurPage from "@/globals/blur-page";
+import InfoBar from "@/globals/infobar";
 import {
   verifyAndAcceptInvitation,
   getNotificationAndUser,
 } from "@/lib/queries";
-import { currentUser } from "@clerk/nextjs";
+import { ClerkProvider, currentUser } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import { redirect } from "next/navigation";
 import React from "react";
 
@@ -27,8 +30,8 @@ const layout = async ({ children, params }: Props) => {
   }
 
   if (
-    user.privateMetadata.Role.role !== "AGENCY_OWNER" &&
-    user.privateMetadata.Role.role !== "AGENCY_ADMIN"
+    (user.privateMetadata.Role as { role: string }).role !== "AGENCY_OWNER" &&
+    (user.privateMetadata.Role as { role: string }).role !== "AGENCY_ADMIN"
   )
     return <Unauthorized />;
 
@@ -38,10 +41,17 @@ const layout = async ({ children, params }: Props) => {
   if (notifications) allNoti = notifications;
 
   return (
-    <div className="h-screen overflow-hidden">
-      <Sidebar id={params.agencyId} type="agency" />
-      <div className="md:pl-[300px]">{children}</div>
-    </div>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
+      <div className="h-screen overflow-hidden">
+        <Sidebar id={params.agencyId} type="agency" />
+        <div className="md:pl-[300px]">
+          <InfoBar notifications={allNoti} />
+          <div className="relative">
+            <BlurPage>{children}</BlurPage>
+          </div>
+        </div>
+      </div>
+    </ClerkProvider>
   );
 };
 

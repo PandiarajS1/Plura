@@ -51,6 +51,7 @@ enum Icon {
   category
   contact
   clipboardIcon
+  launchpad
 }
 
 model User {
@@ -113,6 +114,8 @@ model SubAccount {
   connectAccountId String?                   @default("")
   name             String
   subAccountLogo   String
+  companyEmail     String
+  companyPhone     String
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
   address          String

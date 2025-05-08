@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Agency,
   AgencySidebarOption,
   SubAccount,
   SubAccountSidebarOption,
@@ -9,7 +10,13 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/button";
-import { ChevronsUpDown, Compass, Menu, PlusCircleIcon } from "lucide-react";
+import {
+  ChevronsUpDown,
+  Compass,
+  icons,
+  Menu,
+  PlusCircleIcon,
+} from "lucide-react";
 import clsx from "clsx";
 import { AspectRatio } from "../ui/aspect-ratio";
 import Image from "next/image";
@@ -24,6 +31,11 @@ import {
   CommandList,
 } from "../ui/command";
 import Link from "next/link";
+import { useModal } from "@/providers/modal-provider";
+import CustomModal from "@/globals/custom-modal";
+import SubAccountDetails from "../Forms/subaccounts-details";
+import { Separator } from "../ui/separator";
+import { Icons } from "@/lib/constant";
 
 type Props = {
   defaultOpen?: boolean;
@@ -44,6 +56,7 @@ const MenuOptions = ({
   user,
   id,
 }: Props) => {
+  const { setOpen } = useModal();
   const [isMounted, setIsMounted] = useState(false);
 
   const openState = useMemo(
@@ -58,7 +71,7 @@ const MenuOptions = ({
   if (!isMounted) return;
 
   return (
-    <Sheet open={true} modal={false}>
+    <Sheet modal={false} {...openState}>
       <SheetTrigger
         asChild
         className="absolute left-4 top-4 z-[100] md:hidden flex"
@@ -91,7 +104,7 @@ const MenuOptions = ({
             <PopoverTrigger>
               <Button
                 variant="ghost"
-                className="w-full my-4 flex items-center justify-center py-8"
+                className="w-full my-4 flex items-center justify-center py-8 "
               >
                 <div className="flex items-center text-left gap-2">
                   <Compass />
@@ -221,14 +234,66 @@ const MenuOptions = ({
                 </CommandList>
                 {(user?.role === "AGENCY_OWNER" ||
                   user?.role === "AGENCY_ADMIN") && (
-                  <Button className="w-full flex gap-2">
-                    <PlusCircleIcon size={15} />
-                    Create Sub Account
-                  </Button>
+                  <SheetClose>
+                    <Button
+                      className="w-full flex gap-2"
+                      onClick={() => {
+                        setOpen(
+                          <CustomModal
+                            title="Create A Sub Account"
+                            subHeading="You can switch between your agency account and the sub account from the sidebar"
+                          >
+                            <SubAccountDetails
+                              agencyDetails={user?.Agency as Agency}
+                              userId={user?.id as string}
+                              userName={user?.name as string}
+                            />
+                          </CustomModal>,
+                        );
+                      }}
+                    >
+                      <PlusCircleIcon size={15} />
+                      Create Sub Account
+                    </Button>
+                  </SheetClose>
                 )}
               </Command>
             </PopoverContent>
           </Popover>
+          <p className="text-muted-foreground text-xs md-2">MENU LINKS</p>
+          <Separator className="my-4" />
+          <nav className="relative">
+            <Command className="rounded-lg overflow-visible bg-transparent">
+              <CommandInput placeholder="Search..." className="mb-2 border-0" />
+              <CommandList className="pb-4 overflow-visible">
+                <CommandEmpty>No Result Found</CommandEmpty>
+                <CommandGroup className="overflow-visible">
+                  {sidebarOption.map((option) => {
+                    let val;
+                    const result = Icons.find((icon) => {
+                      return icon.value === option.icon;
+                    });
+                    if (result) {
+                      val = <result.path />;
+                    }
+                    return (
+                      <CommandItem
+                        key={option.id}
+                        className="w-full md:w-[320px]"
+                      >
+                        <Link
+                          href={option.link}
+                          className="flex items-center gap-2 hover:bg-transparent rounded-md transition-all md:w-full w-[320px]"
+                        >
+                          {val} <span>{option.name}</span>{" "}
+                        </Link>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </nav>
         </div>
       </SheetContent>
     </Sheet>

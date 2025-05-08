@@ -3,7 +3,9 @@
 import { clerkClient, currentUser } from "@clerk/nextjs";
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import { Agency, Plan, Role, User } from "@prisma/client";
+import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
+import { v4 } from "uuid";
+import { sub } from "date-fns";
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
@@ -290,4 +292,180 @@ export const getNotificationAndUser = async (agencyId: string) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+export const upsertSubAccount = async (subAccount: SubAccount) => {
+  if (!subAccount.companyEmail) return null;
+  const agencyOwner = await db.user.findFirst({
+    where: {
+      Agency: {
+        id: subAccount.agencyId,
+      },
+      role: "AGENCY_OWNER",
+    },
+  });
+
+  if (!agencyOwner) return console.log("Error could not ceate subaccount");
+
+  const permissionId = v4();
+  const response = await db.subAccount.upsert({
+    where: {
+      id: subAccount.id,
+    },
+    update: subAccount,
+    create: {
+      ...subAccount,
+      permissions: {
+        create: {
+          access: true,
+          email: agencyOwner.email,
+          id: permissionId,
+        },
+        connect: {
+          subAccountId: subAccount.id,
+          id: permissionId,
+        },
+      },
+      Pipeline: {
+        create: { name: "Lead Cycle" },
+      },
+      SideBarOption: {
+        create: [
+          {
+            name: "Launchpad",
+            icon: "clipboardIcon",
+            link: `/subaccount/${subAccount.id}/launchpad`,
+          },
+          {
+            name: "Settings",
+            icon: "settings",
+            link: `/subaccount/${subAccount.id}/settings`,
+          },
+          {
+            name: "Funnels",
+            icon: "pipelines",
+            link: `/subaccount/${subAccount.id}/funnels`,
+          },
+          {
+            name: "Media",
+            icon: "database",
+            link: `/subaccount/${subAccount.id}/media`,
+          },
+          {
+            name: "Automations",
+            icon: "chip",
+            link: `/subaccount/${subAccount.id}/automations`,
+          },
+          {
+            name: "Pipelines",
+            icon: "flag",
+            link: `/subaccount/${subAccount.id}/pipelines`,
+          },
+          {
+            name: "conatacts",
+            icon: "person",
+            link: `/subaccount/${subAccount.id}/contacts`,
+          },
+          {
+            name: "Dashboard",
+            icon: "category",
+            link: `/subaccount/${subAccount.id}`,
+          },
+        ],
+      },
+    },
+  });
+  return response;
+};
+
+export const getUserPermissions = async (userId: string) => {
+  const response = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      permissions: {
+        include: {
+          SubAccount: true,
+        },
+      },
+    },
+  });
+
+  return response;
+};
+
+export const updateUser = async (user: Partial<User>) => {
+  const authuser = await currentUser();
+
+  const response = await db.user.update({
+    where: { email: user.email },
+    data: { ...user },
+  });
+
+  await clerkClient.users.updateUserMetadata(response?.id, {
+    privateMetadata: {
+      Role: response?.role || "SUBACCOUNT_USER",
+    },
+  });
+
+  return response;
+};
+
+export const changeUserPermissions = async (
+  permissionId: string,
+  userEmail: string,
+  subAccountId: string,
+  permission: boolean,
+) => {
+  try {
+    const response = await db.permissions.upsert({
+      where: {
+        id: permissionId,
+      },
+      update: { access: permission },
+      create: {
+        access: permission,
+        email: userEmail,
+        subAccountId: subAccountId,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log("Could not change permission", error);
+  }
+};
+
+export const getSubaccountDetails = async (subAccountId: string) => {
+  const response = await db.subAccount.findUnique({
+    where: {
+      id: subAccountId,
+    },
+  });
+
+  return response;
+};
+
+export const deleteSubAccount = async (subAccountId: string) => {
+  const response = await db.subAccount.delete({
+    where: {
+      id: subAccountId,
+    },
+  });
+
+  return response;
+};
+
+export const deleteUser = async (userId: string) => {
+  await clerkClient.users.updateUserMetadata(userId, {
+    privateMetadata: {
+      role: undefined,
+    },
+  });
+
+  const response = await db.user.delete({
+    where: {
+      id: userId,
+    },
+  });
+
+  return response;
 };

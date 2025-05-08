@@ -8,6 +8,7 @@ export default withUt({
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+    "./globals/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {

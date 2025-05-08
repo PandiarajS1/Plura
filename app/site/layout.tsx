@@ -1,19 +1,18 @@
-import Navigation from '@/components/Navigation/Navigation'
-import { ClerkProvider } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
-import React from 'react'
+import Navigation from "@/components/Navigation/Navigation";
+import { ClerkProvider, currentUser } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import React from "react";
 
-const layout = ({children}:{children:React.ReactNode}) => {
+const layout = async ({ children }: { children: React.ReactNode }) => {
+  const user = await currentUser();
   return (
-    <ClerkProvider 
-     appearance={{baseTheme:dark}}
-    >
-    <main className='h-full'>
-        <Navigation/>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
+      <main className="h-full">
+        <Navigation user={user} />
         {children}
-    </main>
+      </main>
     </ClerkProvider>
-  )
-}
+  );
+};
 
-export default layout
+export default layout;

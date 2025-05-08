@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
+import { UsersWithAgencySubAccountPermissionsSidebaroptions } from "@/lib/types";
 import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
-import { permission } from "process";
 import React from "react";
 
 type Props = {};
@@ -53,7 +53,7 @@ export const columns: ColumnDef<UsersWithAgencySubAccountPermissionsSidebaroptio
         const isAgency =
           row.getValue("role") === "AGENCY_OWNER" ||
           row.getValue("role") === "AGENCY_ADMIN";
-        const owmnedAccounts = row.original?.Permissions.filter(
+        const owmnedAccounts = row.original?.permissions.filter(
           (per) => per.access === true,
         );
 

@@ -2,8 +2,8 @@ import { db } from "@/lib/db";
 import React from "react";
 import DataTable from "./data-table";
 import { Plus } from "lucide-react";
-import columns from "./columns";
 import { currentUser } from "@clerk/nextjs";
+import { columns } from "./columns";
 
 type Props = {
   params: {

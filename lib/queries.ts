@@ -3,9 +3,8 @@
 import { clerkClient, currentUser } from "@clerk/nextjs";
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
+import { Agency, Plan, SubAccount, User } from "@prisma/client";
 import { v4 } from "uuid";
-import { sub } from "date-fns";
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
@@ -245,7 +244,7 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
             },
             {
               name: "Launchpad",
-              icon: "clipboardIcon",
+              icon: "launchpad",
               link: `/agency/${agency.id}/launchpad`,
             },
             {
@@ -462,6 +461,16 @@ export const deleteUser = async (userId: string) => {
   });
 
   const response = await db.user.delete({
+    where: {
+      id: userId,
+    },
+  });
+
+  return response;
+};
+
+export const getUser = async (userId: string) => {
+  const response = await db.user.findUnique({
     where: {
       id: userId,
     },

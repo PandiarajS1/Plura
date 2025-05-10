@@ -11,7 +11,7 @@ const page = async (props: {
   const searchParams = await props.searchParams;
   const authUser = await currentUser();
   const agencyId = await verifyAndAcceptInvitation();
-  console.log(agencyId);
+  console.log("Agency id", agencyId);
 
   //get user details
   const user = await getAuthUserDetails();

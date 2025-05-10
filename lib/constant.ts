@@ -236,7 +236,7 @@ export const Icons = [
     path: FileText,
   },
   {
-    Value: "launchpad",
+    Value: "clipboardIcon",
     label: "Launchpad",
     path: RocketIcon,
   },

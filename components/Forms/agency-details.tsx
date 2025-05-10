@@ -49,6 +49,7 @@ import {
 } from "../ui/alert-dialog";
 import { v4 } from "uuid";
 import { revalidatePath } from "next/cache";
+import { revalidateAgencyPath } from "@/app/actions/revalidate-agency";
 
 type Props = {
   data?: Partial<Agency>;
@@ -145,9 +146,9 @@ const AgencyDetails = ({ data }: Props) => {
           goal: 5,
         });
         toast("Created Agency");
-        if (data?.id) return revalidatePath(`/agency`);
+        if (data?.id) return revalidateAgencyPath();
         if (response) {
-          return revalidatePath(`/agency`);
+          return revalidateAgencyPath();
         }
       }
     } catch (error) {
@@ -168,7 +169,7 @@ const AgencyDetails = ({ data }: Props) => {
       toast("Deleted Agency", {
         description: "Deleted your agency and all subaccounts",
       });
-      revalidatePath(`/agency`);
+      revalidateAgencyPath();
     } catch (error) {
       console.log(error);
       toast("Opps", {
@@ -378,7 +379,7 @@ const AgencyDetails = ({ data }: Props) => {
                         description: `Updated the agency goal to | ${val} SubAccount`,
                         subaccountId: undefined,
                       });
-                      revalidatePath(`/agency`);
+                      revalidateAgencyPath();
                     }}
                     min={1}
                     max={10000}

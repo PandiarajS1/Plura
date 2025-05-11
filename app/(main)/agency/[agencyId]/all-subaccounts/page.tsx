@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,8 +24,8 @@ import { SubAccount } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import DeleteButton from "./_components/delete-button";
-import CreateButton from "./_components/create_button";
+import DeleteButton from "./components/delete-button";
+import CreateButton from "./components/create_button";
 
 type Props = {
   params: {

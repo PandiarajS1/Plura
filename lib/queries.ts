@@ -3,7 +3,7 @@
 import { clerkClient, currentUser } from "@clerk/nextjs";
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import { Agency, Plan, SubAccount, User } from "@prisma/client";
+import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
 import { v4 } from "uuid";
 
 export const getAuthUserDetails = async () => {
@@ -43,7 +43,7 @@ export const verifyAndAcceptInvitation = async () => {
       email: invitationExists.email,
       agencyId: invitationExists.agencyId,
       avatarUrl: user.imageUrl,
-      id: user.id,
+      id: invitationExists.id,
       name: `${user.firstName} ${user.lastName}`,
       role: invitationExists.role,
       createdAt: new Date(),
@@ -82,7 +82,7 @@ export const verifyAndAcceptInvitation = async () => {
 };
 const createTeamUser = async (agencyId: string, user: User) => {
   if (user.role === "AGENCY_OWNER") return null;
-  const response = await db.user.create({ data: { ...user } });
+  const response = await db.user.create({ data: { ...user, id: v4() } });
   return response;
 };
 
@@ -160,7 +160,7 @@ export const saveActivityLogsNotification = async ({
   } else {
     await db.notification.create({
       data: {
-        notification: `${userData.name} | ${Notification}`,
+        notification: `${userData.name} | ${description}`,
         User: {
           connect: {
             id: userData.id,
@@ -475,6 +475,36 @@ export const getUser = async (userId: string) => {
       id: userId,
     },
   });
+
+  return response;
+};
+
+export const sentInvitation = async (
+  role: Role,
+  email: string,
+  agencyId: string,
+) => {
+  const response = await db.invitation.create({
+    data: {
+      email,
+      role,
+      agencyId,
+    },
+  });
+
+  try {
+    const invitation = await clerkClient.invitations.createInvitation({
+      emailAddress: email,
+      redirectUrl: process.env.NEXT_PUBLIC_URL,
+      publicMetadata: {
+        throughInvitation: true,
+        role,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 
   return response;
 };
